@@ -14,7 +14,7 @@ createDirectory(directory_name)
 
 
 def interface_ips(i):
-    x = i / 256
+    x = i // 256
     y = i % 256
     ret = "10." + str(x) + "." + str(y) + "."
     return (ret + "0", ret + "1")
@@ -23,7 +23,7 @@ def interface_ips(i):
 def network(i, k):
     if k >= 256:
         raise ValueError('k must be < 256')
-    x = i / 256
+    x = i // 256
     y = i % 256
     ret = "70." + str(x) + "." + str(y)
     subnets = [ret + "." + str(j * 2) + "/31" for j in range(k)]
@@ -180,11 +180,11 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
     config_name = dir_name + os.path.sep + "configs"
     createDirectory(config_name)
     for n in topo.nodes():
-        data = topo.node[n]
+        data = topo.nodes[n]
         name = data['name']
         net = data['net']
         subnets = data['subnets']
-        fname = config_name + os.path.sep + name
+        fname = config_name + os.path.sep + name + '.cfg'
         f = open(fname, 'w')
         f.write('!\n')
         f.write('! Last configuration change at 14:32:22 UTC Wed Oct 11 2017 by demo\n')
@@ -252,7 +252,7 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
         f.write("!\n")
 
         counter = 0
-        for (m, edge) in topo[n].iteritems():
+        for (m, edge) in topo[n].items():
             # print(topo[n])
             (iface, p_iface) = edge['ips']
             f.write("interface Serial" + str(counter) + "\n")
@@ -285,12 +285,12 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
                 f.write("  network " + net + "\n")
 
             # print("node", n, "name", name)
-            for (m, edge) in topo[n].iteritems():
+            for (m, edge) in topo[n].items():
                 (iface, p_iface) = edge['ips']
                 f.write("  neighbor " + p_iface + " remote-as " + str(m) + "\n")
                 f.write("  neighbor " + p_iface + " send-community\n")
 
-                nbr_name = topo.node[m]["name"]
+                nbr_name = topo.nodes[m]["name"]
                 # print("m", m, "m_name", nbr_name)
                 # print("edge", edge)
 
