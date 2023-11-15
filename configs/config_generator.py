@@ -1,6 +1,5 @@
 import os
-import sys
-import math
+
 import networkx as nx
 
 
@@ -278,7 +277,7 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
             f.write("!\n")
 
         if bgp:
-            f.write("router bgp " + str(n) + "\n")
+            f.write("router bgp " + str(n + 1) + "\n")  # use str(n + 1) to avoid AS Number 0
             f.write("  bgp bestpath as-path multipath-relax\n")
 
             if len(subnets) > 0:
@@ -287,7 +286,8 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
             # print("node", n, "name", name)
             for (m, edge) in topo[n].items():
                 (iface, p_iface) = edge['ips']
-                f.write("  neighbor " + p_iface + " remote-as " + str(m) + "\n")
+                # use str(m + 1) to avoid AS Number 0
+                f.write("  neighbor " + p_iface + " remote-as " + str(m + 1) + "\n")
                 f.write("  neighbor " + p_iface + " send-community\n")
 
                 nbr_name = topo.nodes[m]["name"]
@@ -421,20 +421,23 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
         f.write('end')
 
 
+def create(k: int, policy: str, proto: str):
+    dir_name = os.path.sep.join(['networks', proto, policy])
+
+    createDirectory(dir_name)
+    print('\t'.join([policy, proto, 'fattree' + str(k)]))
+
+    topo, dest, src = fat_tree_topology(k)
+    print("k: {}, dest: {}, src: {}".format(k, dest, src))
+
+    dir_name = dir_name + os.path.sep + "fattree" + str(k)
+    createConfigs(topo, dir_name, dest, bgp=(proto == "bgp"), valleyfree=(policy == "vf"))
+    createScriptSingleSrc(dir_name, dest, src)
+
+
 if __name__ == '__main__':
-    # Usage: python2 cisco_configs_sp.py
-    for k in range(10, 51, 10):
-        for policy in ["sp", "vf"]:
-            createDirectory('networks' + os.path.sep + policy)
-            for proto in ["bgp", "ospf"]:
-                dir_name = os.path.sep.join(['networks', policy, proto])
-
-                createDirectory(dir_name)
-                print('\t'.join([policy, proto, 'fattree' + str(k)]))
-
-                topo, dest, src = fat_tree_topology(k)
-                print("k: {}, dest: {}, src: {}".format(k, dest, src))
-
-                dir_name = dir_name + os.path.sep + "fattree" + str(k)
-                createConfigs(topo, dir_name, dest, bgp=(proto == "bgp"), valleyfree=(policy == "vf"))
-                createScriptSingleSrc(dir_name, dest, src)
+    for k in [4, 6, 8, 10, 20, 30, 40, 50]:
+        for proto in ["bgp", "ospf"]:
+            createDirectory('networks' + os.path.sep + proto)
+            for policy in ["sp", "vf"]:
+                create(k, policy, proto)
