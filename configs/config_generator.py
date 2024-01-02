@@ -15,7 +15,10 @@ createDirectory(directory_name)
 def interface_ips(i):
     x = i // 256
     y = i % 256
-    ret = "10." + str(x) + "." + str(y) + "."
+
+    z = x // 256
+    x = x % 256
+    ret = str(10 + z) + "." + str(x) + "." + str(y) + "."
     return (ret + "0", ret + "1")
 
 
@@ -436,7 +439,7 @@ def create(k: int, policy: str, proto: str):
 
 
 if __name__ == '__main__':
-    for k in [4, 6, 8, 10, 20, 30, 40, 50]:
+    for k in [4, 6, 8, 10, 20, 30, 40, 50, 60]:
         for proto in ["bgp", "ospf"]:
             createDirectory('networks' + os.path.sep + proto)
             for policy in ["sp", "vf"]:
