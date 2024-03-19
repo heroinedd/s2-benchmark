@@ -18,7 +18,7 @@ def interface_ips(i):
 
     z = x // 256
     x = x % 256
-    ret = str(10 + z) + "." + str(x) + "." + str(y) + "."
+    ret = str(10 + z)+ "." + str(x) + "." + str(y) + "."
     return (ret + "0", ret + "1")
 
 
@@ -281,6 +281,7 @@ def createConfigs(topo, dir_name, dest, bgp=True, valleyfree=False):
 
         if bgp:
             f.write("router bgp " + str(n + 1) + "\n")  # use str(n + 1) to avoid AS Number 0
+            f.write("  maximum-paths " + str(k) + "\n")
             f.write("  bgp bestpath as-path multipath-relax\n")
 
             if len(subnets) > 0:
@@ -439,7 +440,7 @@ def create(k: int, policy: str, proto: str):
 
 
 if __name__ == '__main__':
-    for k in [4, 6, 8, 10, 20, 30, 40, 50, 60]:
+    for k in [4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 8]:
         for proto in ["bgp", "ospf"]:
             createDirectory('networks' + os.path.sep + proto)
             for policy in ["sp", "vf"]:
